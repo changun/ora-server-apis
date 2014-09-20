@@ -1,7 +1,7 @@
 Ora-Server-APIs
 ===============
 
-Ora APIs and be breakdown into three groups: *Lifestreams Login*, *Oauth*, and *Ora* described below. An Ora server is up and running at http://lifestreams.smalldata.io. 
+Ora APIs can be breakdown into three groups: *Lifestreams Login*, *Oauth*, and *Ora* described below. An Ora server is up and running at http://lifestreams.smalldata.io. 
 
 #1. Lifestreams Login
 
