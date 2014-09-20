@@ -6,36 +6,36 @@ Ora APIs can be breakdown into three groups: *Lifestreams Login*, *Oauth*, and *
 #1. Lifestreams Login
 
   * **GET** */login* (required parameter ***redirect***)
-      * This API starts the login process of Lifestreams. An Ora client should have a *"Sign-in with Google"* button which, upon clicked, directs user to this API. A ***redirect*** parameter should be given to let Lifestreams server know where the user should be redirected to after login. 
+      * This API starts the login process of Lifestreams. An Ora client should have a *"Sign-in with Google"* button which, upon click, directs user to this API. A ***redirect*** parameter should be given to let Lifestreams server know where the user should be redirected to after login. 
       
-      * If sign-in succeeded, the server will redirect the user to the redirect url with ***key*** and ***uid*** paramter set. The ***key*** is a temporary token for the client to interact with Lifestreams server in behalf of the user. The ***uid*** is the unique identifier of the user in the system. Please remember both of them as they will be needed in the subsequent requests.
+      * If sign-in succeeded, the server will redirect the user to the ***redirect*** url with ***key*** and ***uid*** paramters appended. The ***key*** is a temporary token for the client to interact with Lifestreams server in behalf of the user. The ***uid*** is the unique identifier of the user in the system. Please remember both of them as they will be needed in the subsequent requests.
       
-      * If sign-in failed, the server will redirect the user to the redirect url with ***error*** parameter set, which specifies the reason of failure. 
+      * If sign-in failed, the server will redirect the user to the ***redirect*** url with ***error*** parameter appended, which specifies the reason of failure. 
       *
-      * Note that the redirect parameter must be a full and encoded url. **Example**: http://lifestreams.smalldata.io/login?redirect=http%3A%2F%2Fwww.google.com%0A
+      * Note that the redirect parameter must be a full and properly encoded url. **Example**: http://lifestreams.smalldata.io/login?redirect=http%3A%2F%2Fwww.google.com%0A
         
 #2. Oauth
   * **GET** */oauth/check-auth* (required parameter ***key*** and ***provider***)
-      * This API allows a client to check wheter the user has connected a specific data provider with Lifestreams or not. Currently the supported providers are *gmail* and *moves* (case sensitive).
+      * This API allows a client to check wheter the user has connected a specific data provider with Lifestreams or not. Currently, the supported providers are *gmail* and *moves* (case sensitive).
       
-      * A Ora client should prevent the user from entering the Ora main UI if the user has not connected both gmail and moves to Lifestreams.
+      * A Ora client should prevent the user from entering the Ora main UI if the user has not connected either gmail or moves with Lifestreams.
       
       * **Example**: http://lifestreams.smalldata.io/oauth/check-auth?provider=gmail&key=[KEY_RETURNED_BY_LOGIN_API]
       
   *  **GET** */oauth/auth* (required parameter ***key***, ***provider***, and ***redirect***)
-      * This API starts the OAuth procedure for the user to grant the access to his/her data to Lifestreams and redirects the user to the ***redirect*** url when procedure finished.
+      * This API starts the OAuth procedure for the user to connect his account on a specific data provider with Lifestreams and redirects the user to the ***redirect*** url when procedure finished.
       * **Example**: http://lifestreams.smalldata.io/oauth/check-auth?provider=gmail&key=[KEY_RETURNED_BY_LOGIN_API]&redirect=http%3A%2F%2Fwww.google.com%0A
 
 #3. Ora
   * **GET** */ora/users* (required paramter: ***key***)
-      * Returns a JSON array with all the exisitng Ora users' uids.
+      * Returns a JSON array containing all the exisitng Ora users' uids (including the requesting user him or herself).
       * **Sample Response**
       
         ```json
         ["c8fcd06d-ed99-4575-bb95-1a33a033b0a8"]
         ```
         
-  * **GET** */ora/* ***:uid:*** */profile* (required paramter: ***key***. The ***uid*** segment of the url must be a uid returned in the previous API)
+  * **GET** */ora/* ***:uid:*** */profile* (required paramter: ***key***. The ***uid*** segment of the url must be a valid uid returned in the previous API)
       * Returns a JSON object that contains the profile of a specific user.
       * **Sample Response**  
       
@@ -100,7 +100,7 @@ Ora APIs can be breakdown into three groups: *Lifestreams Login*, *Oauth*, and *
         ```
         
   * **GET** */ora/* ***:uid:*** */daily*  (required paramter: ***key***. Optional parameters: ***start*** and ***end*** in ISO8601 local date format e.g. 2014-09-09)
-      * Returns everyday's daily summary of a Ora user in the time range specified by ***start*** and ***end*** JSON format.
+      * Returns everyday's daily summary of a Ora user in the time range specified by ***start*** and ***end*** parameters.
       * **Sample Response**
       
       ```json
