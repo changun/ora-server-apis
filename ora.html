@@ -56,7 +56,7 @@
                 var displayName = uid == myUid ? "Me" : profile["displayName"];
                 var keyComponent = "?key=" + key;
                 // compose url to the ora API and email times API
-                var oraAPI = oraBaseUrl + uid + "/ora" + keyComponent;
+                var oraAPI = oraBaseUrl + uid + "/daily" + keyComponent;
                 var emailTimesAPI = oraBaseUrl + uid + "/email-times" + keyComponent;
                 // create tr and append tds for index, displayName and links to APIs
                 var tr =  $('<tr></tr>').appendTo($("#table"));
