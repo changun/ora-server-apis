@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        .gray {
+            opacity: 0.4;
+            filter: alpha(opacity=80); /* msie */
+            -webkit-filter: grayscale(100%);
+            -moz-filter: grayscale(100%);
+            -o-filter: grayscale(100%);
+            -ms-filter: grayscale(100%);
+            filter: grayscale(100%);
+        }
+    </style>
+</head>
+<body>
+<div id="sign-in-div">
+    <h1>Ora Demo(with Absolutely ZERO UI)</h1>
+
+    <a href="#">
+        <img width="200"
+             src="https://developers.google.com/accounts/images/sign-in-with-google.png"
+             alt="Sign-In with Google"
+             id="sign-in"/>
+    </a>
+</div>
+
+<div id="auth-div">
+    <h2>Hi <span id="name"></span></h2>
+    <h2>To Proceed We Need To Connect with:</h2>
+    <a href="#">
+        <img id="moves-icon" src="https://www.moves-app.com/assets/moves-logo-206x206.png" width="300px" height="300px">
+    </a>
+    <a href="#">
+    <img id="gmail-icon" src="http://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png" width="300px" height="300px">
+    </a>
+</div>
+</body>
+
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+<script src="jquery.parseurl.min.js"></script>
+<!-- urls of ora apis -->
+<script src="urls.js"></script>
+<script>
+    // my url used in redirect parameter
+    var myUrl = "http://localhost:63342/ora-demo/index.html";
+
+    $("#sign-in").click(function(e){
+        // redirect user to the ora sign-in page with redirect parameter set as myUrl
+        window.location = loginUrl + "?redirect=" + encodeURIComponent(myUrl);
+    });
+    var queryParams = $.parseUrl(window.location).query;
+    // get key and uid parameter in the current query params
+    var key = queryParams["key"];
+    var uid = queryParams["uid"];
+
+    // if key and uid are available
+    if(key && key.length > 0 && uid && uid.length > 0){
+        // query profile of the user
+        var myProfileUrl = oraBaseUrl + uid + "/profile";
+        $("#sign-in-div").hide();
+        $.getJSON(myProfileUrl, {"key" : key}, function(profile){
+            $("#name").html(profile["displayName"]);
+        });
+
+        // check if user has his gmail and moves account connected
+        var returns = [];
+        ["gmail", "moves"].forEach(function(provider){
+            $.getJSON(checkAuthUrl, {"key" : key, "provider": provider},
+            function(response){
+                var connected = response["result"];
+                // push the results to the returns array
+                returns.push(connected);
+                // if checkAuth for gmail and moves both return true
+                if(returns.length == 2 && returns[0] && returns[1] ){
+                    // redirect to ora.html with key and uid parameters
+                    window.location = "ora.html?" + $.param({"key":key, "uid":uid});
+                }else {
+                    var icon = $("#" + provider + "-icon");
+                    // if user has NOT connected with the service
+                    if (connected == false) {
+                        // when corresponding icon is clicked, redirect user to the authURL for that service
+                        // with redirect parameter set as the current URL
+                        icon.click(function () {
+                            window.location = authUrl + "?" +
+                                    $.param({"key": key, "provider": provider, "redirect": window.location.href});
+                        });
+                    }else{ // if user has connected, gray out the icon
+                        icon.addClass("gray");
+                    }
+                }
+
+            });
+
+
+        });
+
+    }else{
+        $("#auth-div").hide();
+    }
+
+
+</script>
+</html>

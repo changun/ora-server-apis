@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+<table id="table">
+
+</table>
+
+</body>
+
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+<script src="jquery.parseurl.min.js"></script>
+<script src="http://rsvpjs-builds.s3.amazonaws.com/rsvp-latest.min.js"></script>
+<!-- urls of ora apis -->
+<script src="urls.js"></script>
+<script>
+
+    // get key parameter in the current url
+    var key = $.parseUrl(window.location).query["key"];
+    // get uid parameter in the current url
+    var myUid = $.parseUrl(window.location).query["uid"];
+    // url for api that returns all Ora user
+    var usersUrl =  oraBaseUrl  + "users";
+    // send ajax to get all the users
+    var profilePromises = new RSVP.Promise(function(resolve, reject) {
+        $.getJSON(usersUrl, {"key":key}, function(response){
+                    resolve(response);
+                }
+        )
+    }).then(
+       function(users) {
+         // make my uid as the first one in the user array
+         users = [myUid].concat(users.filter(function(u){return u != myUid;}));
+
+         // get everyone's profile
+         var profilePromises = users.map(function(u){
+             return new RSVP.Promise(function(resolve, reject) {
+                 $.getJSON(oraBaseUrl + u + "/profile", {"key":key}, function(response){
+                             resolve(response);
+                         }
+                 )
+             });
+
+         });
+         // callback when we have got everyone's profile
+         RSVP.all(profilePromises).then(function(profiles){
+            profiles.forEach(function(profile, i){
+                // create a tr for each user
+                var uid = profile.uid;
+                // if the uid == myUid, set the displayName to be "me", otherwise use the retured display name
+                var displayName = uid == myUid ? "Me" : profile["displayName"];
+                var keyComponent = "?key=" + key;
+                // compose url to the ora API and email times API
+                var oraAPI = oraBaseUrl + uid + "/ora" + keyComponent;
+                var emailTimesAPI = oraBaseUrl + uid + "/email-times" + keyComponent;
+                // create tr and append tds for index, displayName and links to APIs
+                var tr =  $('<tr></tr>').appendTo($("#table"));
+                tr.append('<td width="30px">' + (i+1) + '</td>');
+                tr.append('<td width="200px">' + displayName + '</td>');
+                tr.append('<td width="200px"><a href="'+ oraAPI +'"> Ora API </a></td>');
+                tr.append('<td width="200px"><a href="'+ emailTimesAPI +'"> Email Times API </a></td>');
+               })
+           });
+       }
+    );
+
+
+
+</script>
+</html>

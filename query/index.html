@@ -1,0 +1,209 @@
+<!doctype html>
+<head>
+<title>CodeMirror: SPARQL mode</title>
+<meta charset="utf-8"/>
+
+<style type="text/css">
+    .CodeMirror {
+        border: 1px solid #eee;
+
+        height: 1000px;
+    }
+    .CodeMirror-scroll {
+        height: 1000px;
+        overflow-y: hidden;
+        overflow-x: auto;
+    }
+
+</style>
+</head>
+<div id=nav>
+<link rel="stylesheet" href="lib/codemirror.css">
+<script src="lib/codemirror.js"></script>
+<script src="addon/edit/matchbrackets.js"></script>
+<script src="sparql.js"></script>
+<script src="mode/css/css.js"></script>
+<script src="javascript.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+<article>
+
+
+
+<table width="100%"><tr><td width="50%">
+    <h2>SPARQL</h2>
+
+    <textarea id="code" name="code">
+
+
+    </textarea>
+    <input id="submit" type="button" value="Submit">
+</td>
+<td>
+<h2>Output</h2>
+<form><textarea id="json" name="json">
+
+</textarea></form>
+</td></tr></table>
+    <script>
+      var queryURL = "http://lifestreams.smalldata.io/oauth/query";
+      var userid ="c8fcd06d-ed99-4575-bb95-1a33a033b0a8";
+      var codeEditor = CodeMirror.fromTextArea(document.getElementById("code"), {
+        mode: "application/x-sparql-query",
+        matchBrackets: true,
+          lineNumbers: true,
+          viewportMargin: Infinity
+      });
+      codeEditor.setSize(600, 500);
+      var output = CodeMirror.fromTextArea(document.getElementById("json"), {
+        matchBrackets: true,
+        autoCloseBrackets: true,
+        mode: "application/ld+json",
+        lineWrapping: true,
+          lineNumbers: true,
+          viewportMargin: Infinity
+      });
+      output.setSize(600, 500);
+	$("#submit").click(function(e){
+		$.post( queryURL, {"cmd": codeEditor.getValue()}, function( data ) {
+            output.setValue(JSON.stringify(data, null, '\t'));
+		}, 'json').fail(function(xhr) {
+            alert( xhr.responseText );
+        });
+
+    	});
+
+      var emailCluster = function(){/*
+# email clustering by location
+PREFIX schema: <http://schema.org/>
+PREFIX sdl: <http://lifestreams.smalldata.io/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX f: <http://lifestreams.smalldata.io/function#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT (COUNT(?mail) as ?count) ?lat ?lng
+FROM <urn:x-arq:DefaultGraph>
+FROM <http://lifestreams.smalldata.io/users/**userid**>
+{
+# get stay action
+?stay a schema:StayAction;
+# location
+schema:location ?place;
+# start/end time
+schema:startTime ?stay_start;
+schema:endTime ?stay_end.
+
+# get lat/lng of location
+?place schema:geo ?geo.
+?geo schema:latitude ?lat.
+?geo schema:longitude ?lng.
+
+# get SendActions and start/end time
+?mail a  schema:SendAction;
+schema:startTime ?start;
+schema:endTime ?end.
+
+# show mails sent within the stay action's time range
+FILTER (?start >= ?stay_start && ?end <= ?stay_end).
+
+#BIND( f:singlePassClustering(?lat, ?lng, 200) AS ?geo_cluster )
+
+} GROUP BY ?lat ?lng*/}.toString().slice(14,-3).replace("**userid**", userid);;
+      var emailOnTheGo = function(){/*
+# email on the go
+
+PREFIX schema: <http://schema.org/>
+PREFIX sdl: <http://lifestreams.smalldata.io/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX f: <http://lifestreams.smalldata.io/function#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?wordcount ?start
+FROM <urn:x-arq:DefaultGraph>
+FROM <http://lifestreams.smalldata.io/users/**userid**>
+{
+# get Travel action
+?travel a schema:TravelAction;
+# start/end time
+schema:startTime ?travel_start;
+schema:endTime ?travel_end.
+
+# get SendActions and start/end time
+?send a  schema:SendAction;
+schema:startTime ?start;
+schema:endTime ?end;
+schema:object ?mail.
+
+?mail schema:wordcount ?wordcount.
+# show mails sent within the stay action's time range
+FILTER (?start >= ?travel_start && ?end <= ?travel_end).
+
+#BIND( f:singlePassClustering(?lat, ?lng, 200) AS ?geo_cluster )
+
+}
+       */}.toString().slice(14,-3).replace("**userid**", userid);
+
+var timeSpentTogether = function(){/*
+
+ # time spent together
+ PREFIX schema: <http://schema.org/>
+ PREFIX sdl: <http://lifestreams.smalldata.io/>
+ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+ PREFIX f: <http://lifestreams.smalldata.io/function#>
+ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+ SELECT ?local_date (SUM(?overlap) as ?overlap_hours)
+ FROM <urn:x-arq:DefaultGraph>
+ FROM <http://lifestreams.smalldata.io/users/7e9b3cec-e9a4-4976-9ed4-2249cf0ec522>
+ FROM <http://lifestreams.smalldata.io/users/865d1950-b59a-47ee-bf6d-c278cea4f740>
+ {
+ # get stay action from each person
+ ?stay1 a schema:StayAction;
+ schema:agent ?user1;
+ schema:startTime ?stay_start1;
+ schema:endTime ?stay_end1;
+ schema:location ?place1.
+ ?place1 schema:geo ?geo1.
+ ?geo1 schema:latitude ?lat1;
+ schema:longitude ?lng1.
+
+
+ ?stay2 a schema:StayAction;
+ schema:agent ?user2;
+ schema:startTime ?stay_start2;
+ schema:endTime ?stay_end2;
+ schema:location ?place2.
+ ?place2 schema:geo ?geo2.
+ ?geo2 schema:latitude ?lat2;
+ schema:longitude ?lng2.
+
+ # check distance
+ FILTER(?user1 != ?user2 && f:distanceInMeter(?lat1, ?lng1, ?lat2, ?lng2))
+
+ # check overlapping
+ FILTER((?stay_start1 >= ?stay_start2 && ?stay_start1 <= ?stay_end2)
+ || (?stay_start2 >= ?stay_start1 && ?stay_start2 <= ?stay_end1))
+ # compute overlapping interval
+ BIND (IF(?stay_start1 > ?stay_start2, ?stay_start1, ?stay_start2) AS ?overlap_start)
+ BIND (IF(?stay_end1 < ?stay_end2, ?stay_end1, ?stay_end2) AS ?overlap_end)
+
+ BIND ( (f:inMillis(?overlap_end) - f:inMillis(?overlap_start)) / 7200000.0 AS ?overlap).
+
+ # get local date
+ BIND (f:toLocalDate(?overlap_end)   as ?local_date)
+
+
+ } GROUP BY ?local_date
+ */}.toString().slice(14,-3).replace("**userid**", userid);
+    $('<a href="#">  /Email Clustering/  </a>').appendTo($("body")).click(function(){
+        codeEditor.setValue(emailCluster);
+    });
+      $('<a href="#">  / Email On the Go /  </a>').appendTo($("body")).click(function(){
+          codeEditor.setValue(emailOnTheGo);
+      });
+    $('<a href="#">  / Time Spent Together /  </a>').appendTo($("body")).click(function(){
+        codeEditor.setValue(timeSpentTogether);
+    });
+    </script>
+    
+  </article>
