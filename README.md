@@ -6,24 +6,25 @@ Ora APIs can be breakdown into three groups: *Lifestreams Login*, *Oauth*, and *
 #1. Lifestreams Login
 
   * **GET** */login* (required parameter ***redirect***)
-      * This API starts the login process of Lifestreams. An Ora client should have a *"Sign-in with Google"* button which, upon click, directs user to this API. A ***redirect*** parameter should be given to let Lifestreams server know where the user should be redirected to after login. 
+      * This API starts the login process of Lifestreams. An Ora client should have a *"Sign-in with Google"* button which, upon click, directs user to this API. A ***redirect*** parameter should be specified to let Lifestreams server know where the user should be redirected to after login. 
       
-      * If sign-in succeeded, the server will redirect the user to the ***redirect*** url with ***key*** and ***uid*** paramters appended. The ***key*** is a temporary token for the client to interact with Lifestreams server in behalf of the user. The ***uid*** is the unique identifier of the user in the system. Please remember both of them as they will be needed in the subsequent requests.
+      * If sign-in succeeded, the server will redirect the user to the ***redirect*** url with ***key*** and ***uid*** paramters appended. The ***key*** is a temporary token for the client to interact with Lifestreams server on behalf of the user. The ***uid*** is the unique identifier of the user in the system. Please remember both of them as they will be needed in the subsequent requests.
       
       * If sign-in failed, the server will redirect the user to the ***redirect*** url with ***error*** parameter appended, which specifies the reason of failure. 
       *
-      * Note that the redirect parameter must be a full and properly encoded url. **Example**: http://lifestreams.smalldata.io/login?redirect=http%3A%2F%2Fwww.google.com%0A
+      * Note that the redirect parameter must be a full and properly encoded url. 
+      * **Example**: http://lifestreams.smalldata.io/login?redirect=http%3A%2F%2Fwww.google.com%0A
         
-#2. Oauth
+#2. OAuth
   * **GET** */oauth/check-auth* (required parameter ***key*** and ***provider***)
-      * This API allows a client to check wheter the user has connected a specific data provider with Lifestreams or not. Currently, the supported providers are *gmail* and *moves* (case sensitive).
+      * This API allows the client to check wheter the user has connected a specific data provider with Lifestreams or not. Currently, the supported providers are *gmail* and *moves* (case sensitive).
       
       * A Ora client should prevent the user from entering the Ora main UI if the user has not connected either gmail or moves with Lifestreams.
       
       * **Example**: http://lifestreams.smalldata.io/oauth/check-auth?provider=gmail&key=[KEY_RETURNED_BY_LOGIN_API]
       
   *  **GET** */oauth/auth* (required parameter ***key***, ***provider***, and ***redirect***)
-      * This API starts the OAuth procedure for the user to connect his account on a specific data provider with Lifestreams and redirects the user to the ***redirect*** url when procedure finished.
+      * This API starts the OAuth procedure for the user to connect his a specific data provider with Lifestreams and redirects the user to the ***redirect*** url when procedure finished.
       * **Example**: http://lifestreams.smalldata.io/oauth/check-auth?provider=gmail&key=[KEY_RETURNED_BY_LOGIN_API]&redirect=http%3A%2F%2Fwww.google.com%0A
 
 #3. Ora
@@ -101,6 +102,40 @@ Ora APIs can be breakdown into three groups: *Lifestreams Login*, *Oauth*, and *
         
   * **GET** */ora/* ***:uid:*** */daily*  (required paramter: ***key***. Optional parameters: ***start*** and ***end*** in ISO8601 local date format e.g. 2014-09-09)
       * Returns everyday's daily summary of a Ora user in the time range specified by ***start*** and ***end*** parameters.
+      * Mobility Features
+       * local_date, 
+       * mobility_data_coverage
+          * the coverage of mobility data. One should take the accuracy of mobility features (especially the home-related features) with a grain of salt if the coverage is lower than a threshold (says 60%).
+       * geodiameter
+       * exercise_dur
+          * how much time (**in minutes**) the user spent exercising (walking/running/cycling etc.)
+       * if_detect_home
+          * whether the user stays at the same location at the begining and at the end of the day. Only consider the home-related features below meaningful, when this value is *true*.
+       * time_leave_home
+          * the first time in the day the user left home.
+       * time_return_home
+          * the last time the user returned home.
+          * Note that, when *time_return_home < time_leave_home*, it means the user stays at home whole day.
+       * backhome_dur
+          * the amount of time (**in minutes**), between the above leave/return home interval, the user was at home.
+      * Email Features
+       * email_sent_count
+          * number of emails sent.
+       * liwc_posmo_count
+          * number Positive Emotions words wrriten. (See: http://www.liwc.net/comparedicts.php)
+       * liwc_negemo_count
+       * liwc_anx_count
+       * liwc_anger_count
+       * liwc_sad_count
+       * liwc_family_count
+       * liwc_health_count
+       * liwc_work_count
+       * liwc_home_count
+       * liwc_social_count
+       * total_wordcount
+          * total number of words.
+       * distinct_recipients
+          * total number of distince recipients (including cced).
       * **Sample Response**
       
       ```json
