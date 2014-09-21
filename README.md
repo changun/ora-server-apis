@@ -102,7 +102,7 @@ Ora APIs can be breakdown into three groups: *Lifestreams Login*, *Oauth*, and *
         
   * **GET** */ora/* ***:uid:*** */daily*  (required paramter: ***key***. Optional parameters: ***start*** and ***end*** in ISO8601 local date format e.g. 2014-09-09)
       * Returns everyday's daily summary of a Ora user in the time range specified by ***start*** and ***end*** parameters.
-      * Mobility Features
+      * **Mobility Features**
        * local_date, 
        * mobility_data_coverage
           * the coverage of mobility data. One should take the accuracy of mobility features (especially the home-related features) with a grain of salt if the coverage is lower than a threshold (says 60%).
@@ -118,7 +118,7 @@ Ora APIs can be breakdown into three groups: *Lifestreams Login*, *Oauth*, and *
           * Note that, when *time_return_home < time_leave_home*, it means the user stays at home whole day.
        * backhome_dur
           * the amount of time (**in minutes**), between the above leave/return home interval, the user was at home.
-      * Email Features
+      * **Email Features**
        * email_sent_count
           * number of emails sent.
        * liwc_posmo_count
