@@ -336,7 +336,29 @@ Ora APIs can be breakdown into three groups: *Lifestreams Login*, *Oauth*, and *
 
 }
       ```
-
+  * **GET** */ora/details/* ***:uid:*** */* ***:iso-date:*** (required paramter: ***key***)
+      * Returns the features used to compute the Ora value. A user can only access his or her detail information, attempt to access the other's will result in error response. 
+ ```json
+{
+  "time-outside": 14.02138900756836,
+  "email_sent_count": 60,
+  "first_lng": -73.9833457215,
+  "detect-home?": true,
+  "first_lat": 40.7242084383,
+  "geodiameter": 10184.61204774014,
+  "total_wordcount": 2206,
+  "first_last_place_distance": 0,
+  "log-geodiameter": 9.228731419907932,
+  "local_date": "2014-11-17",
+  "time_return_home": 21.732500076293945,
+  "distinct_recipients": 38,
+  "last_lat": 40.7242084383,
+  "mobility_data_coverage": 0.999988425925926,
+  "last_lng": -73.9833457215,
+  "exercise_dur": 105.33333333333333,
+  "time_leave_home": 7.711111068725586
+}
+      ```
 
 #3. Features
  * **Mobility Features**
